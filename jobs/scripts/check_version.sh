@@ -45,6 +45,7 @@ fi
 
 
 cur_version=$( cat "dotnet-versions/build-info/dotnet/${project}/${branch}/Latest.txt" )
+latest_pkg_list=$( cat "dotnet-versions/build-info/dotnet/${project}/${branch}/Latest_Packages.txt" )
 
 if [ "${version}" == "${cur_version}" ]; then
     echo "Version is not changed (${version})"
@@ -55,12 +56,12 @@ pkglist=( "coreclr:Microsoft.NETCore.Runtime.CoreCLR:version.txt"
           "corefx:Microsoft.Private.CoreFx.NETCoreApp:version.txt"
           "core-setup:Microsoft.NETCore.App:Microsoft.NETCore.App.versions.txt"
         )
-versionlist=( "coreclr:master:2.1.0"
-              "coreclr:release/2.0.0:2.0.0"
-              "corefx:master:4.5.0"
-              "corefx:release/2.0.0:4.4.0"
-              "core-setup:master:2.1.0"
-              "core-setup:release/2.0.0:2.0.0"
+versionlist=( "coreclr:master"
+              "coreclr:release/2.0.0"
+              "corefx:master"
+              "corefx:release/2.0.0"
+              "core-setup:master"
+              "core-setup:release/2.0.0"
             )
 
 for list in ${pkglist[@]}; do
@@ -72,13 +73,12 @@ done
 
 for list in ${versionlist[@]}; do
     IFS=: read -r pkg br major_version <<< ${list}
-    if [ "${pkg}" == "${project}" ] && [ "${br}" == "${branch}" ]; then
-        if [ "${cur_version}" == "stable" ]; then
-            fullversion="${major_version}"
-        else
-            fullversion="${major_version}-${cur_version}"
+    for nupkg_version in ${nupkg_version_list}; do
+        if [ "${nupkg_version}" =~ "${br}" ] && [ "${pkg}" == "${project}" ] && [ "${br}" == "${branch}" ]; then
+            arr=($str)
+            fullversion=${arr[1]}
         fi
-    fi
+    done
 done
 
 nupkg_name="${pkgname}.${fullversion}.nupkg"
